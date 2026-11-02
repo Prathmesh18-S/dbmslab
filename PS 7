@@ -1,0 +1,75 @@
+CREATE TABLE Library (
+    book_id NUMBER(5) PRIMARY KEY,
+    book_name VARCHAR2(50),
+    author VARCHAR2(50),
+    category VARCHAR2(30),
+    book_date DATE,
+    operation VARCHAR2(10)
+);
+
+CREATE TABLE Library_Audit (
+    book_id NUMBER(5),
+    book_name VARCHAR2(50),
+    author VARCHAR2(50),
+    category VARCHAR2(30),
+    book_date DATE,
+    operation VARCHAR2(10)
+);
+
+INSERT INTO Library VALUES (1, 'Wings of Fire', 'A.P.J. Abdul Kalam', 'Biography', DATE '2024-01-10', 'INSERT');
+INSERT INTO Library VALUES (2, 'The Alchemist', 'Paulo Coelho', 'Fiction', DATE '2024-02-12', 'INSERT');
+INSERT INTO Library VALUES (3, '1984', 'George Orwell', 'Fiction', DATE '2024-03-15', 'INSERT');
+INSERT INTO Library VALUES (4, 'Discovery of India', 'Jawaharlal Nehru', 'History', DATE '2024-04-20', 'INSERT');
+INSERT INTO Library VALUES (5, 'Ignited Minds', 'A.P.J. Abdul Kalam', 'Motivation', DATE '2024-05-05', 'INSERT');
+INSERT INTO Library VALUES (6, 'Godan', 'Munshi Premchand', 'Novel', DATE '2024-06-18', 'INSERT');
+INSERT INTO Library VALUES (7, 'Hamlet', 'William Shakespeare', 'Drama', DATE '2024-07-22', 'INSERT');
+INSERT INTO Library VALUES (8, 'The Guide', 'R.K. Narayan', 'Novel', DATE '2024-08-14', 'INSERT');
+INSERT INTO Library VALUES (9, 'Malgudi Days', 'R.K. Narayan', 'Short Stories', DATE '2024-09-09', 'INSERT');
+INSERT INTO Library VALUES (10, 'India 2020', 'A.P.J. Abdul Kalam', 'Technology', DATE '2024-10-01', 'INSERT');
+
+COMMIT;
+
+CREATE OR REPLACE TRIGGER Library_Audit_Trigger
+BEFORE UPDATE OR DELETE ON Library
+FOR EACH ROW
+BEGIN
+    IF UPDATING THEN
+        INSERT INTO Library_Audit
+        VALUES (
+            :OLD.book_id,
+            :OLD.book_name,
+            :OLD.author,
+            :OLD.category,
+            :OLD.book_date,
+            'UPDATE'
+        );
+    ELSIF DELETING THEN
+        INSERT INTO Library_Audit
+        VALUES (
+            :OLD.book_id,
+            :OLD.book_name,
+            :OLD.author,
+            :OLD.category,
+            :OLD.book_date,
+            'DELETE'
+        );
+    END IF;
+END;
+/
+UPDATE Library
+SET book_name = 'Advanced C Programming'
+WHERE book_id = 1;
+
+COMMIT;
+
+SELECT * FROM Library WHERE book_id = 1;
+SELECT * FROM Library_Audit;
+
+
+DELETE FROM Library
+WHERE book_id = 2;
+
+COMMIT;
+
+SELECT * FROM Library_Audit;
+
